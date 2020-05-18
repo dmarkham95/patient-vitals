@@ -162,7 +162,7 @@ const PatientDetailsDialog: React.FC = () => {
 									<TrendChartCard title="Weight" data={trendWeight} icon="web_asset" />
 								</Grid>
 								<Grid item xs={12} sm={6} md={6}>
-									<TrendChartCard title="Pulse Rate" data={trendWeight} icon="linear_scale" />
+									<TrendChartCard title="Pulse Rate" data={trendPulse} icon="linear_scale" />
 								</Grid>
 								<Grid item xs={12} sm={6} md={6}>
 									<TrendChartCard

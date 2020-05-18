@@ -1,3 +1,4 @@
+import { AppTheme } from '@app';
 import AppLayout from '@app/components/AppLayout/AppLayout';
 import { StoreProvider } from 'easy-peasy';
 import React from 'react';
@@ -14,7 +15,9 @@ const App: React.FC = () => {
 			<AppContext.Provider value={{ routes }}>
 				<StoreProvider store={store}>
 					<Router history={history}>
-						<AppLayout />
+						<AppTheme>
+							<AppLayout />
+						</AppTheme>
 					</Router>
 				</StoreProvider>
 			</AppContext.Provider>

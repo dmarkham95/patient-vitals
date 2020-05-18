@@ -12,6 +12,10 @@ type Props = {
 };
 
 const TrendChartCard: React.FC<Props> = (props: Props) => {
+	if (!props.data || props.data.length < 2) {
+		return null;
+	}
+
 	return (
 		<Card elevation={4} className="border-0 card-shadow-first p-4 mb-4">
 			<div className="flex items-center">
