@@ -1,0 +1,48 @@
+Resources:
+  ExpenseTrackerTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    Properties:
+      TableName: ExpenseTracker
+      AttributeDefinitions:
+        - AttributeName: Node
+          AttributeType: S
+        - AttributeName: TypeTarget
+          AttributeType: S
+        - AttributeName: Data
+          AttributeType: S
+        - AttributeName: GSIK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: Node
+          KeyType: HASH
+        - AttributeName: TypeTarget
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 15
+        WriteCapacityUnits: 15
+      GlobalSecondaryIndexes:
+        - IndexName: ByTypeTarget
+          KeySchema:
+            - AttributeName: GSIK
+              KeyType: HASH
+            - AttributeName: TypeTarget
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 10
+            WriteCapacityUnits: 10
+        - IndexName: ByData
+          KeySchema:
+            - AttributeName: GSIK
+              KeyType: HASH
+            - AttributeName: Data
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 10
+            WriteCapacityUnits: 10
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES

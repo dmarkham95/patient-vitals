@@ -1,0 +1,31 @@
+# Environment variables for lambda
+
+default: &default
+  <<: *default
+  ENVIRONMENT: ${self:provider.stage}
+  DISABLE_STREAMS: False
+  DISABLE_CRONJOB: False
+  DB_NAME: ${self:custom.secrets.DB_NAME} # For TypeOrm DB Setup
+  DB_USER: ${self:custom.secrets.DB_USER}
+  DB_PASSWORD: ${self:custom.secrets.DB_PASSWORD}
+  DB_HOST: ${self:custom.secrets.DB_HOST}
+  DB_PORT: ${self:custom.secrets.DB_PORT}
+  NODE_ENV: ${self:custom.secrets.NODE_ENV}
+  IS_OFFLINE: true
+  COGNITO_POOL_ID: ${self:custom.secrets.COGNITO_POOL_ID}
+  COGNITO_CLIENT_ID: ${self:custom.secrets.COGNITO_CLIENT_ID}
+  COGNITO_REGION: ${self:custom.secrets.COGNITO_REGION}
+  DYNAMODB_API_VERSION: ${self:custom.secrets.DYNAMODB_API_VERSION}
+  DYNAMODB_REGION: ${self:custom.secrets.DYNAMODB_REGION}
+  DYNAMODB_TABLE: ${self:custom.secrets.DYNAMODB_TABLE}
+  ACCESS_KEY_ID: ${self:custom.secrets.ACCESS_KEY_ID}
+  SECRET_ACCESS_KEY: ${self:custom.secrets.SECRET_ACCESS_KEY}
+Dev:
+  <<: *default
+  LoggerDebugLevel: debug
+  IS_OFFLINE: False
+
+Prod:
+  <<: *default
+  LoggerDebugLevel: info
+  IS_OFFLINE: False

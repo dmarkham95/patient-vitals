@@ -1,0 +1,157 @@
+service: patient-vitals-api
+description: Nestjs API Application Serverless
+
+# Add the serverless-webpack plugin
+plugins:
+  - serverless-webpack
+  - serverless-prune-plugin
+  - serverless-offline
+  #- serverless-domain-manager
+
+custom:
+  defaultStage: Dev
+  defaultProfile: markham_tech_admin
+  defaultRegion: us-east-1
+  defaultS3ImageBucketName: patient-vitals.app.${self:provider.region}.images
+
+  s3ImageBucketName:
+    Dev: patient-vitals.app.${self:provider.region}.images
+    Prod: images.patient-vitals.app
+
+  isProdCase:
+    Dev: true
+    Prod: false
+    other: false
+
+  s3ImageBucketArn: arn:aws:s3:::${self:custom.s3ImageBucketName.${self:custom.currentStage}, self:custom.defaultS3ImageBucketName}
+  isProd: ${self:custom.isProdCase.${self:custom.currentStage}, self:custom.isProdCase.other}
+  currentStage: ${opt:stage, 'Dev'}
+  secrets: ${file(./serverless/secrets.yml):${self:custom.currentStage}}
+  environmentVars: ${file(./serverless/environment.yml):${self:custom.currentStage}}
+
+  profiles:
+    Dev: markham_tech_admin
+    Prod: markham_tech_admin
+  regions:
+    Dev: us-east-1
+    Prod: us-east-1
+  prune:
+    automatic: true
+    number: 5
+
+  # domains:
+  #   Prod: api.markhamtech.com
+  #   Staging: staging-api.markhamtech.com
+  #   Dev: dev-api.markhamtech.com
+  # customDomain:
+  #   domainName: ${self:custom.domains.${self:custom.stage}} # Change this to your domain.
+  #   basePath: '' # This will be prefixed to all routes
+  #   stage: ${opt:stage, self:provider.stage}
+  #   createRoute53Record: true
+
+  serverless-offline:
+    port: 4000
+  # Load our webpack config
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules:
+      forceInclude:
+        - mysql
+        - mysql2
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 1024
+  timeout: 30
+  logRetentionInDays: 30
+  stage: ${self:custom.currentStage}
+  region: ${self:custom.regions.${self:custom.currentStage}, self:custom.defaultRegion}
+  profile: ${self:custom.profiles.${self:custom.currentStage}, self:custom.defaultProfile}
+  apiName: patient-vitals-app-${self:custom.currentStage}
+  secureEndpoint: true
+  SLS_DEBUG: true
+  versionFunctions: false
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:BatchReadItem
+        - dynamodb:BatchWriteItem
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:Scan
+        - dynamodb:Query
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:DescribeStream
+        - dynamodb:GetRecords
+        - dynamodb:GetShardIterator
+        - dynamodb:ListStreams
+      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/ExpenseTracker*
+    - Effect: Allow
+      Action:
+        - logs:PutLogEvents
+        - logs:DescribeLogStreams
+        - logs:DescribeLogGroups
+        - logs:CreateLogStream
+        - logs:CreateLogGroup
+        - logs:PutRetentionPolicy
+      Resource: arn:aws:logs:${self:provider.region}:*:log-group:ExpenseTracker*
+    - Effect: Allow
+      Action:
+        - cloudwatch:PutMetricData
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - "s3:GetObject"
+        - "s3:PutObject*"
+        - "s3:ListBucket"
+      Resource: "${self:custom.s3ImageBucketArn}/*"
+
+  # deploymentBucket:
+  #   name: patient-vitals.serverless.${self:provider.region}.deploys
+
+package:
+  # individually: true
+  exclude:
+    - secrets.yml
+    - .env
+
+functions:
+  AuthorizerFunc:
+    handler: src/_DistributedServiceLayer/Lambda-Function/authorizer/authorizer.handler
+    environment: ${self:custom.environmentVars}
+    cors: true
+    integration: lambda
+  AuthAPI:
+    handler: src/_DistributedServiceLayer/Lambda-Function/auth/auth.handler
+    environment: ${self:custom.environmentVars}
+    events:
+      - http:
+          method: any
+          path: /auth/{proxy+}
+          cors: true
+  MainAPI:
+    handler: src/_DistributedServiceLayer/Lambda-Function/api/lambda.handler
+    environment: ${self:custom.environmentVars}
+    events:
+      - http:
+          method: any
+          path: /api/{proxy+}
+          cors: true
+          authorizer:
+            name: AuthorizerFunc
+
+# Create our resources with separate CloudFormation templates
+resources:
+  # API Gateway Errors
+  - ${file(resources/api-gateway-errors.yml)}
+  # DynamoDB
+  - ${file(resources/dynamodb-table.yml)}
+  # Cloud Watch Logs
+  #- ${file(resources/cloudwatch-logs.yml)}
+  # S3
+  # - ${file(resources/s3-bucket.yml)}
+  # Cognito
+  # - ${file(resources/cognito-user-pool.yml)}
+  # - ${file(resources/cognito-identity-pool.yml)}

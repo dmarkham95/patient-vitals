@@ -1,0 +1,7 @@
+@import-normalize;
+
+@import 'react-table.css';
+
+@import 'tailwind-base.css';
+
+@import 'tailwind.css';

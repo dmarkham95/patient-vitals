@@ -1,0 +1,17 @@
+client/.env.development
+client/.env.production
+client/.env
+backend/.env
+backend/__tests__
+backend/sum.ts
+backend/testApp.ts
+backend/serverless/secrets.yml
+backend/src/_DistributedServiceLayer/Cron-Job/
+backend/jspm_packages
+backend/.serverless
+backend/.webpack
+backend/lib
+backend/.aws
+backend/dist
+backend/resources/cognito-identity-pool.yml
+backend/resources/cognito-user-pool.yml

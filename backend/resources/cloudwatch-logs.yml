@@ -1,0 +1,7 @@
+Resources:
+  CloudWatchApplicationLogs:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    Properties:
+      LogGroupName: ExpenseTracker/ApplicationLogs
+      RetentionInDays: 60
